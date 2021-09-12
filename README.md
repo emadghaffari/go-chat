@@ -1,2 +1,2 @@
 # go-chat
-go-chat is simple chat service
+go-chat is a simple chat service
