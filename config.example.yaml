@@ -1,0 +1,13 @@
+##########################################################################
+#                                                                        #
+#                          Service Identity Part                         #
+#               For Further information, please check README             #
+#                                                                        #
+##########################################################################
+
+service:
+  name: "chat"
+  id: 001 
+  baseURL: "/api/v1/micro/"
+  host: "localhost"
+  port: ":8082"
