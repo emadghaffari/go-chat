@@ -7,7 +7,7 @@
 
 service:
   name: "chat"
-  id: 001 
+  id: 001
   baseURL: "/api/v1/micro/"
   host: "localhost"
   port: ":8082"
