@@ -10,12 +10,12 @@ import (
 var Messages = make(chan Message)
 var Clients = make(map[string]Client)
 
-type Client struct{
+type Client struct {
 	Incoming chan string
 	Outgoing chan string
 	Reader   *bufio.Reader
 	Writer   *bufio.Writer
-	Conn net.Conn
+	Conn     net.Conn
 }
 
 func (client *Client) Read() {
@@ -46,48 +46,47 @@ func NewClient(connection net.Conn) *Client {
 		Outgoing: make(chan string),
 		Reader:   reader,
 		Writer:   writer,
-		Conn: connection,
+		Conn:     connection,
 	}
 
 	client.Listen()
-
 	return client
 }
 
-type Message struct{
-	Text string
+type Message struct {
+	Text   string
 	Client Client
 }
 
-type Group struct{
+type Group struct {
 	Clients []Client
 }
 
-func broadcast()  {
+func broadcast() {
 	for {
-		select{
+		select {
 		case msg := <-Messages:
-			for _,conn := range Clients {
-				if msg.Client.Conn.RemoteAddr().String() == conn.Conn.RemoteAddr().String(){
+			for _, conn := range Clients {
+				if msg.Client.Conn.RemoteAddr().String() == conn.Conn.RemoteAddr().String() {
 					continue
 				}
-				fmt.Fprintln(conn.Conn,fmt.Sprintf("%s: %s",conn.Conn.RemoteAddr().String(),msg.Text))
+				fmt.Fprintln(conn.Conn, fmt.Sprintf("%s: %s", conn.Conn.RemoteAddr().String(), msg.Text))
 			}
 		}
 	}
 }
 
-func handler(conn net.Conn)  {
+func handler(conn net.Conn) {
 	Clients[conn.RemoteAddr().String()] = *NewClient(conn)
 
-	Messages <- Message{Text: "joined.",Client: Clients[conn.RemoteAddr().String()]}
+	Messages <- Message{Text: "joined.", Client: Clients[conn.RemoteAddr().String()]}
 
 	input := bufio.NewScanner(conn)
 	for input.Scan() {
-		Messages <-Message{Text: input.Text(), Client: Clients[conn.RemoteAddr().String()]}
+		Messages <- Message{Text: input.Text(), Client: Clients[conn.RemoteAddr().String()]}
 	}
 
-	Messages <- Message{Text: "has left.",Client: Clients[conn.RemoteAddr().String()]}
+	Messages <- Message{Text: "has left.", Client: Clients[conn.RemoteAddr().String()]}
 
 	//Delete client form map
 	delete(Clients, conn.RemoteAddr().String())
@@ -95,7 +94,7 @@ func handler(conn net.Conn)  {
 	conn.Close() // NOTE: ignoring network errors
 }
 
-func main()  {
+func main() {
 	listen, err := net.Listen("tcp", "localhost:9090")
 	if err != nil {
 		log.Fatal(err)
@@ -103,7 +102,7 @@ func main()  {
 
 	go broadcast()
 
-	for{
+	for {
 		conn, err := listen.Accept()
 		if err != nil {
 			log.Print(err)
